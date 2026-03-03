@@ -20,7 +20,7 @@ public class CustomerController {
         return ResponseEntity.status(HttpStatus.CREATED).body(customerService.createCustomer(customerRequest));
     }
 
-    @GetMapping("/deleteCustomer/{id}")
+    @DeleteMapping("/deleteCustomer/{id}")
     public ResponseEntity<String> deleteCustomer(@PathVariable long id) {
         return ResponseEntity.status(HttpStatus.OK).body(customerService.deleteCustomer(id));
     }

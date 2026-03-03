@@ -16,4 +16,5 @@ public interface Translations {
     public final String BOOKING_ALREADY_EXPIRED="Booking has already expired!";
     public final String BOOKING_ALREADY_COMPLETED="Already completed bookings can't be cancelled";
     public final String CUSTOMER_DELETED_SUCCESSFULLY="Customer deleted successfully";
+    public final String PAST_CHECK_IN_DATE="Bookings can't be made for past dates";
 }

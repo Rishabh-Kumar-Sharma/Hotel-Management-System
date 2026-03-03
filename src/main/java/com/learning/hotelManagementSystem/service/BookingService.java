@@ -36,6 +36,10 @@ public class BookingService {
     @Transactional
     public CreateBookingResponse createBooking(long customerId, long roomId, LocalDateTime checkIn, LocalDateTime checkOut) {
         try {
+            if(checkIn.isBefore(LocalDateTime.now())) {
+                throw new IllegalArgumentException(Translations.PAST_CHECK_IN_DATE);
+            }
+
             if (checkIn.isAfter(checkOut) || checkIn.isEqual(checkOut)) {
                 throw new IllegalArgumentException(Translations.INVALID_CHECK_IN_CHECK_OUT_TIMES);
             }
