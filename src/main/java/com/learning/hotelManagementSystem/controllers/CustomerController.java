@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/customers")
 public class CustomerController {
@@ -21,8 +23,8 @@ public class CustomerController {
     }
 
     @DeleteMapping("/deleteCustomer/{id}")
-    public ResponseEntity<String> deleteCustomer(@PathVariable long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(customerService.deleteCustomer(id));
+    public ResponseEntity<Map<String,String>> deleteCustomer(@PathVariable long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("message",customerService.deleteCustomer(id)));
     }
 
 }

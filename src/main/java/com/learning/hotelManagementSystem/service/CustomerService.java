@@ -29,6 +29,9 @@ public class CustomerService {
             } else {
                 Customer currCustomer=customer1.get();
                 currCustomer.setActive(true);
+                currCustomer.setName(customer.name());
+                currCustomer.setEmailId(customer.emailId());
+                currCustomer.setContactNo(customer.contactNo());
                 return new CreateCustomerResponse(currCustomer.getId(),currCustomer.getName(),currCustomer.getEmailId(),currCustomer.getContactNo());
             }
         } else {
@@ -62,7 +65,9 @@ public class CustomerService {
     }
 
     public Customer getCustomerDetailsById(long id) {
-        return customerRepository.findById(id).orElseThrow(()->new EntityNotFoundException(Translations.CUSTOMER_DOES_NOT_EXIST));
+        Customer customer=customerRepository.findById(id).orElseThrow(()->new EntityNotFoundException(Translations.CUSTOMER_DOES_NOT_EXIST));
+        if(!customer.isActive()) throw new EntityNotFoundException(Translations.CUSTOMER_DOES_NOT_EXIST);
+        return customer;
     }
 
     public Customer getCustomerDetailsByEmailId(String emailId) {
