@@ -26,5 +26,4 @@ public class CustomerController {
     public ResponseEntity<Map<String,String>> deleteCustomer(@PathVariable long id) {
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("message",customerService.deleteCustomer(id)));
     }
-
 }
