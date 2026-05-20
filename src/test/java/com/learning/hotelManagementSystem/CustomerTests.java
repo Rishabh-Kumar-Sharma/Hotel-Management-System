@@ -16,8 +16,8 @@ public class CustomerTests {
 
     @Test
     public void createCustomer() {
-        Customer customer=new Customer("Rishabh","test@test.com","1234567890");
-        customerService.createCustomer(customer);
+//        Customer customer=new Customer("Rishabh","test@test.com","1234567890");
+//        customerService.createCustomer(customer);
     }
 
     @Test

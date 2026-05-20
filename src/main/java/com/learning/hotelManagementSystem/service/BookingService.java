@@ -1,14 +1,12 @@
 package com.learning.hotelManagementSystem.service;
 
-import com.learning.hotelManagementSystem.DTO.BookingDTO.CancelBookingResponse;
-import com.learning.hotelManagementSystem.DTO.BookingDTO.ConfirmBookingResponse;
+import com.learning.hotelManagementSystem.DTO.BookingDTO.*;
 import com.learning.hotelManagementSystem.entity.Booking;
 import com.learning.hotelManagementSystem.entity.Customer;
 import com.learning.hotelManagementSystem.entity.Room;
 import com.learning.hotelManagementSystem.exceptions.EntityNotAvailableException;
 import com.learning.hotelManagementSystem.repository.BookingRepository;
 import com.learning.hotelManagementSystem.repository.RoomRepository;
-import com.learning.hotelManagementSystem.DTO.BookingDTO.CreateBookingResponse;
 import com.learning.hotelManagementSystem.translations.Translations;
 import com.learning.hotelManagementSystem.types.BookingStatus;
 import jakarta.persistence.EntityNotFoundException;
@@ -23,6 +21,8 @@ import java.util.List;
 
 @Service
 public class BookingService {
+    private static final List<BookingStatus> bookingStatuses =
+            List.of(BookingStatus.CREATED, BookingStatus.CONFIRMED);
 
     @Autowired
     private BookingRepository bookingRepository;
@@ -50,8 +50,6 @@ public class BookingService {
 
             Room room = roomRepository.findByIdForUpdate(roomId);
             if (room == null) throw new EntityNotFoundException(Translations.ROOM_NOT_FOUND);
-
-            List<BookingStatus> bookingStatuses = List.of(BookingStatus.CREATED, BookingStatus.CONFIRMED);
 
             List<Booking> overlappingBookings = bookingRepository.findOverlappingBookings(roomId, checkIn, checkOut, bookingStatuses);
             if (!overlappingBookings.isEmpty()) {
@@ -83,6 +81,22 @@ public class BookingService {
         booking.setBookingStatus(BookingStatus.CONFIRMED);
 
         return new ConfirmBookingResponse(bookingId,booking.getBookingStatus());
+    }
+
+    public List<GetBookingResponse> getAllBookings(GetAllBookingsRequest bookingsRequest) {
+        long customerId=bookingsRequest.customerId();
+        List<Booking> bookings=bookingRepository.getAllBookingsOfCustomer(customerId,bookingStatuses);
+        List<GetBookingResponse> response=bookings.stream().map(booking->
+                new GetBookingResponse(
+                        booking.getCheckIn(),
+                        booking.getCheckOut(),
+                        booking.getRoom().getPricePerNight(),
+                        booking.getRoom().getRoomNumber(),
+                        booking.getRoom().getType()
+                )
+        ).toList();
+
+        return response;
     }
 
     @Transactional

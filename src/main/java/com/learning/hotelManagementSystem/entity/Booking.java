@@ -32,12 +32,12 @@ public class Booking {
     private BookingStatus bookingStatus;
 
     @NonNull
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch=FetchType.LAZY)
     @JoinColumn(name="customer_id", nullable = false)
     private Customer customer;
 
     @NonNull
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="room_id")
     private Room room;
 

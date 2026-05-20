@@ -1,26 +1,22 @@
 package com.learning.hotelManagementSystem.controllers;
 
-import com.learning.hotelManagementSystem.DTO.BookingDTO.CancelBookingResponse;
-import com.learning.hotelManagementSystem.DTO.BookingDTO.ConfirmBookingResponse;
-import com.learning.hotelManagementSystem.DTO.BookingDTO.CreateBookingResponse;
-import com.learning.hotelManagementSystem.DTO.BookingDTO.CreateBookingRequest;
+import com.learning.hotelManagementSystem.DTO.BookingDTO.*;
+import com.learning.hotelManagementSystem.entity.Booking;
 import com.learning.hotelManagementSystem.service.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+
 @RestController
-@RequestMapping("/api/bookings")
+@RequestMapping("/bookings")
 public class BookingController {
 
     @Autowired
     private BookingService bookingService;
-
-//    @GetMapping("/")
-//    public String testResponse() {
-//        return "Working fine bro";
-//    }
 
     @PostMapping("/createBooking")
     public ResponseEntity<CreateBookingResponse> createBooking(@RequestBody CreateBookingRequest bookingRequest) {
@@ -38,6 +34,11 @@ public class BookingController {
     public ResponseEntity<CancelBookingResponse> cancelBooking(@PathVariable long bookingId) {
         return ResponseEntity.status(HttpStatus.OK).
                 body(bookingService.cancelBooking(bookingId));
+    }
+
+    @PostMapping("/getAllBookings")
+    public ResponseEntity<Map<String, List<GetBookingResponse>>> fetchAllBookings(@RequestBody GetAllBookingsRequest bookingsRequest) {
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("booking",bookingService.getAllBookings(bookingsRequest)));
     }
 }
 

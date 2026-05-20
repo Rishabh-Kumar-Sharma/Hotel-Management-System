@@ -67,5 +67,14 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
     int expireCompletedBookings(@Param("confirmedStatus") BookingStatus confirmedStatus,
                                 @Param("completedStatus") BookingStatus completedStatus,
                                 @Param("now") LocalDateTime now);
+
+    @Query("""
+            select b
+            from Booking b
+            where b.customer.id= :customerId
+            and b.bookingStatus in (:activeStatuses)
+            """)
+    List<Booking> getAllBookingsOfCustomer(@Param("customerId") long customerId,
+                                           @Param("activeStatuses") List<BookingStatus> bookingStatuses);
 }
 
