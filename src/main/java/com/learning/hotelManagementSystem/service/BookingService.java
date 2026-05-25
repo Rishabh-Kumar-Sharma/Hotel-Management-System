@@ -4,9 +4,12 @@ import com.learning.hotelManagementSystem.DTO.BookingDTO.*;
 import com.learning.hotelManagementSystem.entity.Booking;
 import com.learning.hotelManagementSystem.entity.Customer;
 import com.learning.hotelManagementSystem.entity.Room;
+import com.learning.hotelManagementSystem.entity.User;
 import com.learning.hotelManagementSystem.exceptions.EntityNotAvailableException;
 import com.learning.hotelManagementSystem.repository.BookingRepository;
+import com.learning.hotelManagementSystem.repository.CustomerRepository;
 import com.learning.hotelManagementSystem.repository.RoomRepository;
+import com.learning.hotelManagementSystem.repository.UserRepository;
 import com.learning.hotelManagementSystem.translations.Translations;
 import com.learning.hotelManagementSystem.types.BookingStatus;
 import jakarta.persistence.EntityNotFoundException;
@@ -14,6 +17,7 @@ import jakarta.persistence.LockTimeoutException;
 import jakarta.persistence.PessimisticLockException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -33,9 +37,17 @@ public class BookingService {
     @Autowired
     private RoomRepository roomRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
+
     @Transactional
-    public CreateBookingResponse createBooking(long customerId, long roomId, LocalDateTime checkIn, LocalDateTime checkOut) {
+    public CreateBookingResponse createBooking(long roomId, LocalDateTime checkIn, LocalDateTime checkOut) {
         try {
+            final String username= SecurityContextHolder.getContext().getAuthentication().getName();
+            User user=userRepository.findUserByUserName(username).orElseThrow(()->new EntityNotFoundException(Translations.USER_DOES_NOT_EXIST));
+            Customer customer=customerRepository.findCustomerByUser(user).orElseThrow(()->new EntityNotFoundException(Translations.CUSTOMER_DOES_NOT_EXIST));
             if(checkIn.isBefore(LocalDateTime.now())) {
                 throw new IllegalArgumentException(Translations.PAST_CHECK_IN_DATE);
             }
@@ -43,8 +55,6 @@ public class BookingService {
             if (checkIn.isAfter(checkOut) || checkIn.isEqual(checkOut)) {
                 throw new IllegalArgumentException(Translations.INVALID_CHECK_IN_CHECK_OUT_TIMES);
             }
-
-            Customer customer = customerService.getCustomerDetailsById(customerId);
 
             if (!customer.isActive()) throw new IllegalArgumentException(Translations.CUSTOMER_DOES_NOT_EXIST);
 
@@ -79,12 +89,16 @@ public class BookingService {
         }
 
         booking.setBookingStatus(BookingStatus.CONFIRMED);
+        booking.setExpiresAt(booking.getCheckOut());
 
         return new ConfirmBookingResponse(bookingId,booking.getBookingStatus());
     }
 
-    public List<GetBookingResponse> getAllBookings(GetAllBookingsRequest bookingsRequest) {
-        long customerId=bookingsRequest.customerId();
+    public List<GetBookingResponse> getAllBookings() {
+        final String username=SecurityContextHolder.getContext().getAuthentication().getName();
+        User user=userRepository.findUserByUserName(username).orElseThrow(()->new EntityNotFoundException(Translations.USER_DOES_NOT_EXIST));
+        Customer customer=customerRepository.findCustomerByUser(user).orElseThrow(()->new EntityNotFoundException(Translations.CUSTOMER_DOES_NOT_EXIST));
+        long customerId=customer.getId();
         List<Booking> bookings=bookingRepository.getAllBookingsOfCustomer(customerId,bookingStatuses);
         List<GetBookingResponse> response=bookings.stream().map(booking->
                 new GetBookingResponse(

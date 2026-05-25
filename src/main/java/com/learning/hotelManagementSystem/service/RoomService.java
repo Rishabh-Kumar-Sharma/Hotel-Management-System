@@ -1,9 +1,6 @@
 package com.learning.hotelManagementSystem.service;
 
-import com.learning.hotelManagementSystem.DTO.RoomDTO.CreateRoomRequest;
-import com.learning.hotelManagementSystem.DTO.RoomDTO.CreateRoomResponse;
-import com.learning.hotelManagementSystem.DTO.RoomDTO.GetAllAvailableRoomsResponse;
-import com.learning.hotelManagementSystem.DTO.RoomDTO.RoomResponse;
+import com.learning.hotelManagementSystem.DTO.RoomDTO.*;
 import com.learning.hotelManagementSystem.entity.Room;
 import com.learning.hotelManagementSystem.exceptions.DuplicateEntityException;
 import com.learning.hotelManagementSystem.repository.BookingRepository;
@@ -48,22 +45,24 @@ public class RoomService {
     }
 
     @Transactional
-    public void updateRoomDetails(long id, Room newRoomDetails) {
+    public CreateRoomResponse updateRoomDetails(UpdateRoomRequest newRoomDetails) {
+        final long id=newRoomDetails.id();
         Room room=roomRepository.findById(id).orElseThrow(()->new EntityNotFoundException(Translations.ROOM_NOT_FOUND));
 
-        if(newRoomDetails.getRoomNumber()!=room.getRoomNumber()) {
-            if(roomRepository.existsByRoomNumber(newRoomDetails.getRoomNumber())) {
+        if(newRoomDetails.roomNumber()!=null && newRoomDetails.roomNumber()!=room.getRoomNumber()) {
+            if(roomRepository.existsByRoomNumber(newRoomDetails.roomNumber())) {
                 throw new DuplicateEntityException(Translations.ROOM_ALREADY_EXISTS);
             }
-            room.setRoomNumber(newRoomDetails.getRoomNumber());
+            room.setRoomNumber(newRoomDetails.roomNumber());
         }
 
-        room.setPricePerNight(newRoomDetails.getPricePerNight());
-        room.setCapacity(newRoomDetails.getCapacity());
-        room.setType(newRoomDetails.getType());
-        room.setRoomStatus(newRoomDetails.getRoomStatus());
-
+        if(newRoomDetails.pricePerNight()!=null) room.setPricePerNight(newRoomDetails.pricePerNight());
+        if(newRoomDetails.capacity()!=null) room.setCapacity(newRoomDetails.capacity());
+        if(newRoomDetails.roomType()!=null) room.setType(newRoomDetails.roomType());
+        if(newRoomDetails.roomStatus()!=null) room.setRoomStatus(newRoomDetails.roomStatus());
 //        No need to call 'save' explicitly as the persistence object has become 'dirty' => dirty check in a "Transaction"
+
+        return new CreateRoomResponse(room.getId(),room.getPricePerNight(),room.getRoomNumber(),room.getCapacity(),room.getType());
     }
 
     public GetAllAvailableRoomsResponse getAvailableRooms(LocalDateTime checkIn, LocalDateTime checkOut) {

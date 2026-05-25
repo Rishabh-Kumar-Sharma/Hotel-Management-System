@@ -20,7 +20,7 @@ public class BookingController {
 
     @PostMapping("/createBooking")
     public ResponseEntity<CreateBookingResponse> createBooking(@RequestBody CreateBookingRequest bookingRequest) {
-        CreateBookingResponse bookingResponse=bookingService.createBooking(bookingRequest.customerId(),bookingRequest.roomId(),bookingRequest.checkIn(),bookingRequest.checkOut());
+        CreateBookingResponse bookingResponse=bookingService.createBooking(bookingRequest.roomId(),bookingRequest.checkIn(),bookingRequest.checkOut());
         return ResponseEntity.status(HttpStatus.CREATED).body(bookingResponse);
     }
 
@@ -36,9 +36,9 @@ public class BookingController {
                 body(bookingService.cancelBooking(bookingId));
     }
 
-    @PostMapping("/getAllBookings")
-    public ResponseEntity<Map<String, List<GetBookingResponse>>> fetchAllBookings(@RequestBody GetAllBookingsRequest bookingsRequest) {
-        return ResponseEntity.status(HttpStatus.OK).body(Map.of("booking",bookingService.getAllBookings(bookingsRequest)));
+    @GetMapping("/getAllBookings")
+    public ResponseEntity<Map<String, List<GetBookingResponse>>> fetchAllBookings() {
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("bookings",bookingService.getAllBookings()));
     }
 }
 

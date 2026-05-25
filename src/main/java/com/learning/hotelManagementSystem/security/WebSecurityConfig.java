@@ -16,6 +16,7 @@ public class WebSecurityConfig {
 
     private final PasswordEncoder passwordEncoder;
     private final JWTAuthFilter jwtAuthFilter;
+    private final CustomAuthenticationEntyPoint customAuthenticationEntyPoint;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -32,6 +33,7 @@ public class WebSecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exception->exception.authenticationEntryPoint(customAuthenticationEntyPoint))
         ;
 //        .formLogin(Customizer.withDefaults());
         return httpSecurity.build();

@@ -22,6 +22,6 @@ public class CustomerTests {
 
     @Test
     public void deleteCustomer() {
-        customerService.deleteCustomer(1L);
+        customerService.deleteCustomer();
     }
 }

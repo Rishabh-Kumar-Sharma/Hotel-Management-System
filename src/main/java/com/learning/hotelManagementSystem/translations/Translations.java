@@ -18,4 +18,8 @@ public interface Translations {
     public final String CUSTOMER_DELETED_SUCCESSFULLY="Customer deleted successfully";
     public final String PAST_CHECK_IN_DATE="Bookings can't be made for past dates";
     public final String USER_ALREADY_EXISTS="User already exists";
+    public final String USER_DOES_NOT_EXIST="User doesn't exist";
+    public final String TOKEN_EXPIRED="Authentication expired! Please login again.";
+    public final String INVALID_CREDENTIALS="Invalid Credentials";
+    public final String UNAUTHORIZED_ACCESS ="Please login first";
 }

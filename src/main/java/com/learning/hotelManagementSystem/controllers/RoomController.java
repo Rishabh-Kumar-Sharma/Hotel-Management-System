@@ -1,9 +1,6 @@
 package com.learning.hotelManagementSystem.controllers;
 
-import com.learning.hotelManagementSystem.DTO.RoomDTO.CreateRoomRequest;
-import com.learning.hotelManagementSystem.DTO.RoomDTO.CreateRoomResponse;
-import com.learning.hotelManagementSystem.DTO.RoomDTO.GetAllAvailableRoomsRequest;
-import com.learning.hotelManagementSystem.DTO.RoomDTO.GetAllAvailableRoomsResponse;
+import com.learning.hotelManagementSystem.DTO.RoomDTO.*;
 import com.learning.hotelManagementSystem.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,5 +22,10 @@ public class RoomController {
     @PostMapping("/availableRooms")
     public ResponseEntity<GetAllAvailableRoomsResponse> getAllAvailableRoomsResponse(@RequestBody GetAllAvailableRoomsRequest request) {
         return ResponseEntity.status(HttpStatus.OK).body(roomService.getAvailableRooms(request.checkIn(),request.checkOut()));
+    }
+
+    @PatchMapping("/updateRoom")
+    public ResponseEntity<CreateRoomResponse> updateRoom(@RequestBody UpdateRoomRequest updateRoomRequest) {
+        return ResponseEntity.status(HttpStatus.OK).body(roomService.updateRoomDetails(updateRoomRequest));
     }
 }

@@ -1,6 +1,7 @@
 package com.learning.hotelManagementSystem.repository;
 
 import com.learning.hotelManagementSystem.entity.Customer;
+import com.learning.hotelManagementSystem.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,4 +13,5 @@ public interface CustomerRepository extends JpaRepository<Customer,Long> {
 //    public boolean existsByEmailId(String emailId);
 //    public boolean existsByContactNo(String contactNo);
 //    public Optional<Customer> findByContactNo(String contactNo);
+    public Optional<Customer> findCustomerByUser(User user);
 }

@@ -1,6 +1,5 @@
 package com.learning.hotelManagementSystem.controllers;
 
-import com.learning.hotelManagementSystem.DTO.CustomerDTO.CreateCustomerResponse;
 import com.learning.hotelManagementSystem.DTO.UserDTO.CreateUserRequest;
 import com.learning.hotelManagementSystem.DTO.UserDTO.CreateUserResponse;
 import com.learning.hotelManagementSystem.DTO.UserDTO.LoginUserRequest;

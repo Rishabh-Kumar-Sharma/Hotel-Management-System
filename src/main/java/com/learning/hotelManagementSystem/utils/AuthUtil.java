@@ -16,17 +16,24 @@ public class AuthUtil {
     @Value("${jwt.secretKey}")
     private String jwtSecretKey;
 
+    @Value("${jwt.tokenExpirationTime}")
+    private int tokenExpirationTime;
+
     private final SecretKey getSecretKey() {
         return Keys.hmacShaKeyFor(jwtSecretKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String getUserNameFromToken(String token) {
-        Claims claims=Jwts
+    private Claims getAllClaims(String token) {
+        return Jwts
                 .parser()
                 .verifyWith(getSecretKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    public String getUserNameFromToken(String token) {
+        Claims claims=getAllClaims(token);
         return claims.getSubject();
     }
 
@@ -36,8 +43,17 @@ public class AuthUtil {
                 .subject(user.getUsername())
                 .claim("userId",user.getId().toString())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis()+1000*60*60))
+                .expiration(new Date(System.currentTimeMillis()+1000*tokenExpirationTime))
                 .signWith(getSecretKey())
                 .compact();
+    }
+
+    public boolean isTokenValid(String token) {
+        return getExpirationDateFromToken(token).after(new Date());
+    }
+
+    private Date getExpirationDateFromToken(String token) {
+        Claims claims=getAllClaims(token);
+        return claims.getExpiration();
     }
 }

@@ -1,28 +1,31 @@
 package com.learning.hotelManagementSystem.service;
 
-import com.learning.hotelManagementSystem.DTO.CustomerDTO.CreateCustomerRequest;
-import com.learning.hotelManagementSystem.DTO.CustomerDTO.CreateCustomerResponse;
 import com.learning.hotelManagementSystem.DTO.CustomerDTO.GetCustomerRequest;
 import com.learning.hotelManagementSystem.entity.Customer;
-import com.learning.hotelManagementSystem.exceptions.DuplicateEntityException;
+import com.learning.hotelManagementSystem.entity.User;
 import com.learning.hotelManagementSystem.repository.CustomerRepository;
+import com.learning.hotelManagementSystem.repository.UserRepository;
 import com.learning.hotelManagementSystem.translations.Translations;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
+@AllArgsConstructor
 public class CustomerService {
 
     @Autowired
     private CustomerRepository customerRepository;
+    private final UserRepository userRepository;
 
     @Transactional
-    public String deleteCustomer(long id) {
-        Customer customer=customerRepository.findById(id).orElseThrow(()-> new EntityNotFoundException(Translations.CUSTOMER_DOES_NOT_EXIST));
+    public String deleteCustomer() {
+        String username= SecurityContextHolder.getContext().getAuthentication().getName();
+        User user=userRepository.findUserByUserName(username).orElseThrow(()->new EntityNotFoundException(Translations.USER_DOES_NOT_EXIST));
+        Customer customer=customerRepository.findCustomerByUser(user).orElseThrow(()-> new EntityNotFoundException(Translations.CUSTOMER_DOES_NOT_EXIST));
 
         if(!customer.isActive()) throw new EntityNotFoundException(Translations.CUSTOMER_DOES_NOT_EXIST);
 
@@ -34,12 +37,6 @@ public class CustomerService {
         Customer customer=customerRepository.findById(id).orElseThrow(()->new EntityNotFoundException(Translations.CUSTOMER_DOES_NOT_EXIST));
         if(!customer.isActive()) throw new EntityNotFoundException(Translations.CUSTOMER_DOES_NOT_EXIST);
         return customer;
-    }
-
-    public CreateCustomerResponse getCustomerDetails(GetCustomerRequest customerRequest) {
-        Customer customer=customerRepository.findById(customerRequest.id()).orElseThrow(()->new EntityNotFoundException(Translations.CUSTOMER_DOES_NOT_EXIST));
-        if(!customer.isActive()) throw new EntityNotFoundException(Translations.CUSTOMER_DOES_NOT_EXIST);
-        return new CreateCustomerResponse(customer.getId(),"","","132");
     }
 
 //    public Customer getCustomerDetailsByEmailId(String emailId) {

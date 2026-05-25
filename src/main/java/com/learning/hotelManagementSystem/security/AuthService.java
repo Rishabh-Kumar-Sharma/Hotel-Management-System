@@ -1,7 +1,5 @@
 package com.learning.hotelManagementSystem.security;
 
-import com.learning.hotelManagementSystem.DTO.CustomerDTO.CreateCustomerRequest;
-import com.learning.hotelManagementSystem.DTO.CustomerDTO.CreateCustomerResponse;
 import com.learning.hotelManagementSystem.DTO.UserDTO.CreateUserRequest;
 import com.learning.hotelManagementSystem.DTO.UserDTO.CreateUserResponse;
 import com.learning.hotelManagementSystem.DTO.UserDTO.LoginUserRequest;
@@ -19,6 +17,7 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -74,12 +73,16 @@ public class AuthService {
     }
 
     public LoginUserResponse login(LoginUserRequest loginUserRequest) {
-        Authentication authentication=authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginUserRequest.userName(),loginUserRequest.password())
-        );
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginUserRequest.userName(), loginUserRequest.password())
+            );
 
-        User user=(User)authentication.getPrincipal();
-        String authToken=authUtil.generateToken(user);
-        return new LoginUserResponse(authToken,user.getId(),user.getName());
+            User user = (User) authentication.getPrincipal();
+            String authToken = authUtil.generateToken(user);
+            return new LoginUserResponse(authToken, user.getId(), user.getName(), user.getContactNo());
+        } catch(BadCredentialsException e) {
+            throw new BadCredentialsException(Translations.INVALID_CREDENTIALS);
+        }
     }
 }

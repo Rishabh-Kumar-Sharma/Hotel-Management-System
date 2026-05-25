@@ -1,10 +1,12 @@
 package com.learning.hotelManagementSystem.entity;
 
+import com.learning.hotelManagementSystem.security.RolePermissionMapping;
 import com.learning.hotelManagementSystem.types.AuthProviderTypesEnum;
 import com.learning.hotelManagementSystem.types.UserType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
@@ -25,7 +27,7 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JoinColumn(unique = true, nullable = false)
+    @Column(unique = true, nullable = false)
     private String userName;
 
     @Column(nullable = false)
@@ -49,20 +51,29 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private AuthProviderTypesEnum authProviderType;
 
-    private Set<UserType> roles=new HashSet<>();
-
     @PrePersist
     protected void onCreate() {
         this.createdAt=LocalDateTime.now();
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
-    }
-
-    @Override
     public String getUsername() {
         return userName;
+    }
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    private Set<UserType> roles=new HashSet<>();
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        Set<SimpleGrantedAuthority> authorities=new HashSet<>();
+        roles.forEach(role->{
+            Set<SimpleGrantedAuthority> permissions= RolePermissionMapping.getPermissionsForRole(role);
+            authorities.addAll(permissions);
+            authorities.add(new SimpleGrantedAuthority("ROLE_"+role.name()));
+        });
+
+        return authorities;
     }
 }
