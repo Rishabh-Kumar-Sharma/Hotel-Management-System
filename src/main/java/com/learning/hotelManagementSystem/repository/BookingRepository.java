@@ -73,8 +73,11 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
             from Booking b
             where b.customer.id= :customerId
             and b.bookingStatus in (:activeStatuses)
+            and b.expiresAt> :now
             """)
     List<Booking> getAllBookingsOfCustomer(@Param("customerId") long customerId,
-                                           @Param("activeStatuses") List<BookingStatus> bookingStatuses);
+                                           @Param("activeStatuses") List<BookingStatus> bookingStatuses,
+                                           @Param("now") LocalDateTime now
+                                           );
 }
 

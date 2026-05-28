@@ -30,6 +30,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/admin/**").hasRole(UserType.ADMIN.name())
                         .requestMatchers("/customers/**").hasRole(UserType.CUSTOMER.name())
                         .requestMatchers("/bookings/**").hasAnyRole(UserType.ADMIN.name(),UserType.STAFF.name(),UserType.CUSTOMER.name())
+                        .requestMatchers("/rooms/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

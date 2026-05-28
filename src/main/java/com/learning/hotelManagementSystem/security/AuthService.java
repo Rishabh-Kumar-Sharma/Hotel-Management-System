@@ -13,6 +13,7 @@ import com.learning.hotelManagementSystem.translations.Translations;
 import com.learning.hotelManagementSystem.types.AuthProviderTypesEnum;
 import com.learning.hotelManagementSystem.types.UserType;
 import com.learning.hotelManagementSystem.utils.AuthUtil;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -79,6 +80,12 @@ public class AuthService {
             );
 
             User user = (User) authentication.getPrincipal();
+            if(user.getUserType()==UserType.CUSTOMER) {
+                Customer customer=customerRepository.findCustomerByUser(user).orElseThrow(()->new EntityNotFoundException(Translations.CUSTOMER_DOES_NOT_EXIST));
+                if(!customer.isActive()) {
+                    throw new EntityNotFoundException(Translations.CUSTOMER_DOES_NOT_EXIST);
+                }
+            }
             String authToken = authUtil.generateToken(user);
             return new LoginUserResponse(authToken, user.getId(), user.getName(), user.getContactNo());
         } catch(BadCredentialsException e) {

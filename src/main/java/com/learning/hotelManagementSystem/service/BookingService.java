@@ -99,14 +99,17 @@ public class BookingService {
         User user=userRepository.findUserByUserName(username).orElseThrow(()->new EntityNotFoundException(Translations.USER_DOES_NOT_EXIST));
         Customer customer=customerRepository.findCustomerByUser(user).orElseThrow(()->new EntityNotFoundException(Translations.CUSTOMER_DOES_NOT_EXIST));
         long customerId=customer.getId();
-        List<Booking> bookings=bookingRepository.getAllBookingsOfCustomer(customerId,bookingStatuses);
+        List<Booking> bookings=bookingRepository.getAllBookingsOfCustomer(customerId,bookingStatuses,LocalDateTime.now());
         List<GetBookingResponse> response=bookings.stream().map(booking->
                 new GetBookingResponse(
                         booking.getCheckIn(),
                         booking.getCheckOut(),
                         booking.getRoom().getPricePerNight(),
                         booking.getRoom().getRoomNumber(),
-                        booking.getRoom().getType()
+                        booking.getRoom().getType(),
+                        booking.getBookingStatus(),
+                        booking.getId(),
+                        booking.getExpiresAt()
                 )
         ).toList();
 

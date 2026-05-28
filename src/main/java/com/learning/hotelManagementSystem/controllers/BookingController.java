@@ -24,7 +24,7 @@ public class BookingController {
         return ResponseEntity.status(HttpStatus.CREATED).body(bookingResponse);
     }
 
-    @PostMapping("/confirmBooking/{bookingId}")
+    @GetMapping("/confirmBooking/{bookingId}")
     public ResponseEntity<ConfirmBookingResponse> confirmBooking(@PathVariable long bookingId) {
         return ResponseEntity.status(HttpStatus.OK).
                 body(bookingService.confirmBooking(bookingId));
