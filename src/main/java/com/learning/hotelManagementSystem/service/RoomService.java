@@ -13,7 +13,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -65,7 +65,7 @@ public class RoomService {
         return new CreateRoomResponse(room.getId(),room.getPricePerNight(),room.getRoomNumber(),room.getCapacity(),room.getType());
     }
 
-    public GetAllAvailableRoomsResponse getAvailableRooms(LocalDateTime checkIn, LocalDateTime checkOut) {
+    public GetAllAvailableRoomsResponse getAvailableRooms(Instant checkIn, Instant checkOut) {
         if(checkIn==null || checkOut==null || checkOut.isBefore(checkIn)) {
             throw new IllegalArgumentException(Translations.INVALID_CHECK_IN_CHECK_OUT_TIMES);
         }

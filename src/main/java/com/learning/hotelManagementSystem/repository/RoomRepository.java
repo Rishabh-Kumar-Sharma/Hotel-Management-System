@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,7 +44,7 @@ public interface RoomRepository extends JpaRepository<Room,Long> {
             """)
     public List<Room> findAllAvailableRooms(@Param("roomStatus") RoomStatus roomStatus,
                                    @Param("bookingStatuses")List<BookingStatus> bookingStatuses,
-                                   @Param("checkIn") LocalDateTime checkIn,
-                                   @Param("checkOut") LocalDateTime checkOut);
+                                   @Param("checkIn") Instant checkIn,
+                                   @Param("checkOut") Instant checkOut);
 }
 

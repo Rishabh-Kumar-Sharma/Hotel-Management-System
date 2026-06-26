@@ -8,8 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import java.time.Instant;
 
 @Slf4j
 @Service
@@ -22,8 +21,8 @@ public class BookingCleanupService {
     @Transactional
     @Scheduled(fixedRate = cleanupTime) // every 1 minute
     public void removeExpiredBookings() {
-        int expiredCount=bookingRepository.expireOldBookings(BookingStatus.EXPIRED, BookingStatus.CREATED, LocalDateTime.now());
-        int completedCount=bookingRepository.expireCompletedBookings(BookingStatus.CONFIRMED,BookingStatus.COMPLETED,LocalDateTime.now());
+        int expiredCount=bookingRepository.expireOldBookings(BookingStatus.EXPIRED, BookingStatus.CREATED, Instant.now());
+        int completedCount=bookingRepository.expireCompletedBookings(BookingStatus.CONFIRMED,BookingStatus.COMPLETED,Instant.now());
         if(expiredCount>0) {
             log.info("Expired {} bookings",expiredCount);
         }

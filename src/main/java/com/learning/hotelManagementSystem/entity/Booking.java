@@ -4,7 +4,9 @@ import com.learning.hotelManagementSystem.types.BookingStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 
 @Entity
 @Getter
@@ -20,11 +22,11 @@ public class Booking {
 
     @NonNull
     @Column(name = "check_in")
-    private LocalDateTime checkIn;
+    private Instant checkIn;
 
     @NonNull
     @Column(name="check_out")
-    private LocalDateTime checkOut;
+    private Instant checkOut;
 
     @NonNull
     @Column(name = "status", nullable = false)
@@ -42,19 +44,19 @@ public class Booking {
     private Room room;
 
     @Column(updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @Column(name="expires_at")
-    private LocalDateTime expiresAt;
+    private Instant expiresAt;
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt=LocalDateTime.now();
+        this.createdAt=Instant.now();
         if(this.bookingStatus==null) {
             this.bookingStatus=BookingStatus.CREATED;
         }
         if(this.expiresAt==null) {
-            this.expiresAt = this.createdAt.plusMinutes(15);
+            this.expiresAt = this.createdAt.plus(15, ChronoUnit.MINUTES);
         }
     }
 }

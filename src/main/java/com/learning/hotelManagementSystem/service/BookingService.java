@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -43,16 +43,16 @@ public class BookingService {
     private CustomerRepository customerRepository;
 
     @Transactional
-    public CreateBookingResponse createBooking(long roomId, LocalDateTime checkIn, LocalDateTime checkOut) {
+    public CreateBookingResponse createBooking(long roomId, Instant checkIn, Instant checkOut) {
         try {
             final String username= SecurityContextHolder.getContext().getAuthentication().getName();
             User user=userRepository.findUserByUserName(username).orElseThrow(()->new EntityNotFoundException(Translations.USER_DOES_NOT_EXIST));
             Customer customer=customerRepository.findCustomerByUser(user).orElseThrow(()->new EntityNotFoundException(Translations.CUSTOMER_DOES_NOT_EXIST));
-            if(checkIn.isBefore(LocalDateTime.now())) {
+            if(checkIn.isBefore(Instant.now())) {
                 throw new IllegalArgumentException(Translations.PAST_CHECK_IN_DATE);
             }
 
-            if (checkIn.isAfter(checkOut) || checkIn.isEqual(checkOut)) {
+            if (checkIn.isAfter(checkOut) || checkIn.equals(checkOut)) {
                 throw new IllegalArgumentException(Translations.INVALID_CHECK_IN_CHECK_OUT_TIMES);
             }
 
@@ -81,7 +81,7 @@ public class BookingService {
         if(booking.getBookingStatus()==BookingStatus.CONFIRMED) {
             return new ConfirmBookingResponse(bookingId,booking.getBookingStatus());
         }
-        if(booking.getBookingStatus()==BookingStatus.EXPIRED || booking.getExpiresAt().isBefore(LocalDateTime.now())) {
+        if(booking.getBookingStatus()==BookingStatus.EXPIRED || booking.getExpiresAt().isBefore(Instant.now())) {
             throw new IllegalStateException(Translations.BOOKING_ALREADY_EXPIRED);
         }
         if(booking.getBookingStatus()!=BookingStatus.CREATED) {
@@ -99,7 +99,7 @@ public class BookingService {
         User user=userRepository.findUserByUserName(username).orElseThrow(()->new EntityNotFoundException(Translations.USER_DOES_NOT_EXIST));
         Customer customer=customerRepository.findCustomerByUser(user).orElseThrow(()->new EntityNotFoundException(Translations.CUSTOMER_DOES_NOT_EXIST));
         long customerId=customer.getId();
-        List<Booking> bookings=bookingRepository.getAllBookingsOfCustomer(customerId,bookingStatuses,LocalDateTime.now());
+        List<Booking> bookings=bookingRepository.getAllBookingsOfCustomer(customerId,bookingStatuses,Instant.now());
         List<GetBookingResponse> response=bookings.stream().map(booking->
                 new GetBookingResponse(
                         booking.getCheckIn(),
@@ -129,7 +129,7 @@ public class BookingService {
         if(bookingStatus==BookingStatus.COMPLETED) {
             throw new IllegalStateException(Translations.BOOKING_ALREADY_COMPLETED);
         }
-        if(bookingStatus==BookingStatus.CREATED && booking.getCheckOut().isBefore(LocalDateTime.now())) {
+        if(bookingStatus==BookingStatus.CREATED && booking.getCheckOut().isBefore(Instant.now())) {
             booking.setBookingStatus(BookingStatus.EXPIRED);
             return new CancelBookingResponse(bookingId,booking.getBookingStatus());
         }

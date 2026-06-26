@@ -1,6 +1,5 @@
 package com.learning.hotelManagementSystem.service;
 
-import com.learning.hotelManagementSystem.DTO.CustomerDTO.GetCustomerRequest;
 import com.learning.hotelManagementSystem.entity.Customer;
 import com.learning.hotelManagementSystem.entity.User;
 import com.learning.hotelManagementSystem.repository.CustomerRepository;

@@ -1,6 +1,6 @@
 package com.learning.hotelManagementSystem.DTO.BookingDTO;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
-public record CreateBookingRequest(long roomId, LocalDateTime checkIn, LocalDateTime checkOut) {
+public record CreateBookingRequest(long roomId, Instant checkIn, Instant checkOut) {
 }

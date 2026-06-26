@@ -1,6 +1,6 @@
 package com.learning.hotelManagementSystem.DTO.RoomDTO;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
-public record GetAllAvailableRoomsRequest(LocalDateTime checkIn, LocalDateTime checkOut) {
+public record GetAllAvailableRoomsRequest(Instant checkIn, Instant checkOut) {
 }

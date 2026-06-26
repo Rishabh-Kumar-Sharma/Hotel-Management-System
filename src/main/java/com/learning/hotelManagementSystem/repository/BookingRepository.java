@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Repository
@@ -24,8 +24,8 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
             and b.expiresAt > CURRENT_TIMESTAMP
             """)
     public List<Booking> findOverlappingBookings(@Param("roomId") Long roomId,
-                                                 @Param("checkIn") LocalDateTime checkInTime,
-                                                 @Param("checkOut") LocalDateTime checkoutTime,
+                                                 @Param("checkIn") Instant checkInTime,
+                                                 @Param("checkOut") Instant checkoutTime,
                                                  @Param("bookingStatuses") List<BookingStatus> bookingStatuses
                                                  );
 
@@ -36,8 +36,8 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
             and b.checkIn<:checkOut
             and b.checkOut>:checkIn
             """)
-    public List<Long> findBookedRoomIds(@Param("checkIn") LocalDateTime checkIn,
-                                        @Param("checkOut") LocalDateTime checkOut,
+    public List<Long> findBookedRoomIds(@Param("checkIn") Instant checkIn,
+                                        @Param("checkOut") Instant checkOut,
                                         @Param("activeStatuses") List<BookingStatus> bookingStatuses
     );
 
@@ -55,7 +55,7 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
             """)
     int expireOldBookings(@Param("expiredStatus") BookingStatus expiredStatus,
                           @Param("createdStatus") BookingStatus createdStatus,
-                          @Param("now") LocalDateTime now);
+                          @Param("now") Instant now);
 
     @Modifying
     @Query("""
@@ -66,7 +66,7 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
             """)
     int expireCompletedBookings(@Param("confirmedStatus") BookingStatus confirmedStatus,
                                 @Param("completedStatus") BookingStatus completedStatus,
-                                @Param("now") LocalDateTime now);
+                                @Param("now") Instant now);
 
     @Query("""
             select b
@@ -77,7 +77,7 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
             """)
     List<Booking> getAllBookingsOfCustomer(@Param("customerId") long customerId,
                                            @Param("activeStatuses") List<BookingStatus> bookingStatuses,
-                                           @Param("now") LocalDateTime now
+                                           @Param("now") Instant now
                                            );
 }
 
