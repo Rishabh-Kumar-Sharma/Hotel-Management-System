@@ -1,8 +1,9 @@
 package com.learning.hotelManagementSystem.controllers;
 
 import com.learning.hotelManagementSystem.DTO.BookingDTO.*;
-import com.learning.hotelManagementSystem.entity.Booking;
+import com.learning.hotelManagementSystem.DTO.BookingDTO.ConfirmBookingRequest;
 import com.learning.hotelManagementSystem.service.BookingService;
+import com.learning.hotelManagementSystem.service.BookingWorkflowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,22 +19,24 @@ public class BookingController {
     @Autowired
     private BookingService bookingService;
 
+    @Autowired
+    private BookingWorkflowService bookingWorkflowService;
+
     @PostMapping("/createBooking")
     public ResponseEntity<CreateBookingResponse> createBooking(@RequestBody CreateBookingRequest bookingRequest) {
-        CreateBookingResponse bookingResponse=bookingService.createBooking(bookingRequest.roomId(),bookingRequest.checkIn(),bookingRequest.checkOut());
+        CreateBookingResponse bookingResponse=bookingWorkflowService.createBooking(bookingRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(bookingResponse);
     }
 
-    @GetMapping("/confirmBooking/{bookingId}")
-    public ResponseEntity<ConfirmBookingResponse> confirmBooking(@PathVariable long bookingId) {
-        return ResponseEntity.status(HttpStatus.OK).
-                body(bookingService.confirmBooking(bookingId));
+    @PostMapping("/confirmBooking")
+    public ResponseEntity<ConfirmBookingResponse> confirmBooking(@RequestBody ConfirmBookingRequest request) {
+        return ResponseEntity.status(HttpStatus.OK).body(bookingWorkflowService.confirmBooking(request));
     }
 
     @GetMapping("/cancelBooking/{bookingId}")
     public ResponseEntity<CancelBookingResponse> cancelBooking(@PathVariable long bookingId) {
         return ResponseEntity.status(HttpStatus.OK).
-                body(bookingService.cancelBooking(bookingId));
+                body(bookingWorkflowService.cancelBooking(bookingId));
     }
 
     @GetMapping("/getAllBookings")

@@ -1,6 +1,7 @@
 package com.learning.hotelManagementSystem.ErrorBoundary;
 
 import com.learning.hotelManagementSystem.exceptions.*;
+import com.razorpay.RazorpayException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,5 +40,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiError> handleBadCredentialsException(BadCredentialsException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError(e.getMessage(),ApiErrorCodesEnum.UNAUTHORIZED_ACCESS.name()));
+    }
+
+    @ExceptionHandler(PaymentException.class)
+    public ResponseEntity<ApiError> handleRazorpayException(RazorpayException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiError(e.getMessage(),ApiErrorCodesEnum.RAZORPAY_ERROR.name()));
     }
 }

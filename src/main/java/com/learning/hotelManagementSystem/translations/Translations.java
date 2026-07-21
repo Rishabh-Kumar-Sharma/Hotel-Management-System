@@ -8,8 +8,6 @@ public interface Translations {
     public final String INVALID_CHECK_IN_CHECK_OUT_TIMES="Invalid check-in and check-out times";
     public final String CUSTOMER_DOES_NOT_EXIST="Customer doesn't exist";
     public final String ROOM_NOT_FOUND="No Room Found!";
-    public final String CUSTOMER_EMAIL_ID_ALREADY_EXISTS="Customer with this email id already exists";
-    public final String CUSTOMER_CONTACT_ALREADY_EXISTS="Customer with this contact number already exists";
     public final String ROOM_ALREADY_EXISTS="Room with this room number already exists";
     public final String BOOKING_DOES_NOT_EXIST="Booking not found!";
     public final String BOOKING_CANT_BE_CONFIRMED="Booking can't be confirmed in this state";
@@ -22,4 +20,9 @@ public interface Translations {
     public final String TOKEN_EXPIRED="Authentication expired! Please login again.";
     public final String INVALID_CREDENTIALS="Invalid Credentials";
     public final String UNAUTHORIZED_ACCESS ="Please login first";
+    public final String PAYMENT_FAILED="Payment Failed";
+    public final String PAYMENT_VERIFICATION_FAILED="Payment Verification Failed. Please try again.";
+    public final String PAYMENT_REFUND_FAILED="Payment Refund Failed";
+    public final String PAYMENT_DOES_NOT_EXIST="Payment doesn't exist";
+    public final String REFUND_AMOUNT_GREATER_THAN_PAID="Refund amount can't be more than the amount paid";
 }

@@ -4,6 +4,7 @@ import com.learning.hotelManagementSystem.types.BookingStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
@@ -42,6 +43,15 @@ public class Booking {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="room_id")
     private Room room;
+
+    @Column(name="payment_id")
+    private String paymentId;
+
+    @Column(name="order_id")
+    private String orderId;
+
+    @Column(name="receipt_id")
+    private String receiptId;
 
     @Column(updatable = false)
     private Instant createdAt;

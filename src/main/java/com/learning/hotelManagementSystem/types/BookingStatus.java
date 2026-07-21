@@ -5,5 +5,6 @@ public enum BookingStatus {
     CANCELLED,
     CREATED,
     EXPIRED,
-    COMPLETED
+    COMPLETED,
+    FAILED // booking failed due to non-completion of payment
 }

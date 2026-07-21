@@ -6,5 +6,6 @@ public enum ApiErrorCodesEnum {
     NOT_FOUND,
     BAD_REQUEST,
     DUPLICATE_ENTITY,
-    ENTITY_NOT_AVAILABLE
+    ENTITY_NOT_AVAILABLE,
+    RAZORPAY_ERROR
 }

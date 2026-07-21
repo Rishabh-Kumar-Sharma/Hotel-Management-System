@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BookingService {
@@ -43,7 +44,7 @@ public class BookingService {
     private CustomerRepository customerRepository;
 
     @Transactional
-    public CreateBookingResponse createBooking(long roomId, Instant checkIn, Instant checkOut) {
+    public CreateBookingReponseInternal createBooking(long roomId, Instant checkIn, Instant checkOut) {
         try {
             final String username= SecurityContextHolder.getContext().getAuthentication().getName();
             User user=userRepository.findUserByUserName(username).orElseThrow(()->new EntityNotFoundException(Translations.USER_DOES_NOT_EXIST));
@@ -69,7 +70,7 @@ public class BookingService {
             Booking booking = new Booking(checkIn, checkOut, BookingStatus.CREATED, customer, room);
             bookingRepository.save(booking);
 
-            return new CreateBookingResponse(booking.getId(),booking.getBookingStatus(),booking.getCheckIn(),booking.getCheckOut());
+            return new CreateBookingReponseInternal(booking.getId(),booking.getBookingStatus(),booking.getCheckIn(),booking.getCheckOut(), room.getPricePerNight(), "INR");
         } catch (PessimisticLockException | LockTimeoutException e) {
             throw new EntityNotAvailableException(Translations.BOOKING_IN_PROGRESS);
         }
@@ -109,7 +110,9 @@ public class BookingService {
                         booking.getRoom().getType(),
                         booking.getBookingStatus(),
                         booking.getId(),
-                        booking.getExpiresAt()
+                        booking.getExpiresAt(),
+                        booking.getOrderId(),
+                        booking.getPaymentId()
                 )
         ).toList();
 
@@ -137,5 +140,35 @@ public class BookingService {
         booking.setBookingStatus(BookingStatus.CANCELLED);
 
         return new CancelBookingResponse(bookingId,booking.getBookingStatus());
+    }
+
+    public Booking getBookingDetails(long bookingId) {
+        return bookingRepository.findById(bookingId).orElseThrow(()->new EntityNotFoundException(Translations.BOOKING_DOES_NOT_EXIST));
+    }
+
+    @Transactional
+    public void updateBookingStatus(long bookingId, BookingStatus bookingStatus) {
+        final Booking booking=bookingRepository.findById(bookingId).orElseThrow(()->new EntityNotFoundException(Translations.BOOKING_DOES_NOT_EXIST));
+        booking.setBookingStatus(bookingStatus);
+    }
+
+    @Transactional
+    public void updateBookingOrderId(long bookingId, String orderId) {
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(()->new EntityNotFoundException(Translations.BOOKING_DOES_NOT_EXIST));
+        booking.setOrderId(orderId);
+    }
+
+    @Transactional
+    public void updateBookingPaymentId(long bookingId, String paymentId) {
+        Booking booking=bookingRepository.findById(bookingId).orElseThrow(()->new EntityNotFoundException(Translations.BOOKING_DOES_NOT_EXIST));
+        booking.setPaymentId(paymentId);
+    }
+
+    @Transactional
+    public void updateBookingReceiptId(long bookingId, String receiptId) {
+        Booking booking=bookingRepository.findById(bookingId).orElseThrow(()->new EntityNotFoundException(Translations.BOOKING_DOES_NOT_EXIST));
+        if(receiptId!=null) {
+            booking.setReceiptId(receiptId);
+        }
     }
 }
