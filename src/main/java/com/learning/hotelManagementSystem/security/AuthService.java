@@ -92,4 +92,11 @@ public class AuthService {
             throw new BadCredentialsException(Translations.INVALID_CREDENTIALS);
         }
     }
+
+    public LoginUserResponse getUserData(String authToken) {
+        final String parsedAuthToken=authToken.substring(7);
+        final String userName=authUtil.getUserNameFromToken(parsedAuthToken);
+        final User user= userRepository.findUserByUserName(userName).orElseThrow(()->new EntityNotFoundException(Translations.CUSTOMER_DOES_NOT_EXIST));
+        return new LoginUserResponse(parsedAuthToken,user.getId(),user.getName(),user.getContactNo());
+    }
 }

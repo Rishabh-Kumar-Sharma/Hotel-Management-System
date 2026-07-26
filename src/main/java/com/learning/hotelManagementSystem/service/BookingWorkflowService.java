@@ -23,42 +23,61 @@ public class BookingWorkflowService {
     private PaymentService paymentService;
 
     public CreateBookingResponse createBooking(CreateBookingRequest request) {
-        CreateBookingReponseInternal bookingResponse=bookingService.createBooking(request.roomId(), request.checkIn(), request.checkOut());
-        CreateOrderRequest req=new CreateOrderRequest(bookingResponse.amount(),bookingResponse.currency(),request.receiptId(),bookingResponse.bookingId());
-        CreateOrderResponse orderResponse=paymentService.createOrder(req);
+        CreateBookingReponseInternal bookingResponse = bookingService.createBooking(request.roomId(), request.checkIn(), request.checkOut());
+        try {
+            CreateOrderRequest req = new CreateOrderRequest(bookingResponse.amount(), bookingResponse.currency(), request.receiptId(), bookingResponse.bookingId());
+            CreateOrderResponse orderResponse = paymentService.createOrder(req);
 
-        bookingService.updateBookingOrderId(bookingResponse.bookingId(),orderResponse.orderId());
-        bookingService.updateBookingReceiptId(bookingResponse.bookingId(),request.receiptId());
+            bookingService.updateOrderDetails(req.bookingId(), orderResponse.receiptId(), orderResponse.orderId());
 
-        return new CreateBookingResponse(
-                bookingResponse.bookingId(),
-                bookingResponse.bookingStatus(),
-                bookingResponse.checkIn(),
-                bookingResponse.checkOut(),
-                bookingResponse.amount(),
-                bookingResponse.currency(),
-                orderResponse.orderId(),
-                orderResponse.receiptId()
-        );
+            return new CreateBookingResponse(
+                    bookingResponse.bookingId(),
+                    bookingResponse.bookingStatus(),
+                    bookingResponse.checkIn(),
+                    bookingResponse.checkOut(),
+                    bookingResponse.amount(),
+                    bookingResponse.currency(),
+                    orderResponse.orderId(),
+                    orderResponse.receiptId()
+            );
+        } catch(Exception e) {
+            bookingService.updateBookingStatus(bookingResponse.bookingId(),BookingStatus.FAILED);
+            throw e;
+        }
     }
 
     public ConfirmBookingResponse confirmBooking(ConfirmBookingRequest request) {
-        ConfirmBookingResponse res=bookingService.confirmBooking(request.bookingId());
-        boolean isPaymentSuccess=paymentService.verifyPayment(request);
+        boolean isPaymentSuccess=false;
+        try {
+            isPaymentSuccess = paymentService.verifyPayment(request);
 
-        if(!isPaymentSuccess) {
-            bookingService.updateBookingStatus(request.bookingId(), BookingStatus.FAILED);
-            throw new PaymentException(Translations.BOOKING_CANT_BE_CONFIRMED);
+            if (!isPaymentSuccess) {
+                bookingService.updateBookingStatus(request.bookingId(), BookingStatus.FAILED);
+                throw new PaymentException(Translations.BOOKING_CANT_BE_CONFIRMED);
+            }
+
+            ConfirmBookingResponse res = bookingService.confirmBooking(request.bookingId(), request.razorpay_payment_id());
+            return new ConfirmBookingResponse(res.bookingId(), res.bookingStatus());
+        } catch(Exception e) {
+            try {
+                final Booking booking = bookingService.getBookingDetails(request.bookingId());
+                if (isPaymentSuccess) {
+                    paymentService.refundPayment(new RefundPaymentRequest(booking.getId(), booking.getRoom().getPricePerNight()));
+                }
+            } catch(Exception refundException) {
+                log.error("Refund Exception = {}",request.bookingId(),refundException);
+            } finally {
+                bookingService.updateBookingStatus(request.bookingId(),BookingStatus.FAILED);
+            }
+
+            throw e;
         }
-
-        bookingService.updateBookingPaymentId(request.bookingId(),request.razorpay_payment_id());
-        return new ConfirmBookingResponse(res.bookingId(),res.bookingStatus());
     }
 
     public CancelBookingResponse cancelBooking(long bookingId) {
-        Booking booking=bookingService.getBookingDetails(bookingId);
-        if(booking.getBookingStatus()==BookingStatus.CONFIRMED) {
-            paymentService.refundPayment(new RefundPaymentRequest(bookingId,booking.getRoom().getPricePerNight()));
+        Booking booking = bookingService.getBookingDetails(bookingId);
+        if (booking.getBookingStatus() == BookingStatus.CONFIRMED) {
+            paymentService.refundPayment(new RefundPaymentRequest(bookingId, booking.getRoom().getPricePerNight()));
         }
 
         return bookingService.cancelBooking(bookingId);

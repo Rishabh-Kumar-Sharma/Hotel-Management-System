@@ -16,11 +16,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthService authService;
 
-    @GetMapping("/test")
-    public String Test() {
-        return "Working";
-    }
-
     @PostMapping("/signup")
     public ResponseEntity<CreateUserResponse> signup(@RequestBody CreateUserRequest customerRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.signup(customerRequest));
@@ -29,5 +24,10 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginUserResponse> login(@RequestBody LoginUserRequest loginRequest) {
         return ResponseEntity.status(HttpStatus.OK).body(authService.login(loginRequest));
+    }
+
+    @GetMapping("/fetchCurrentUser")
+    public ResponseEntity<LoginUserResponse> getCurrentUser(@RequestHeader("Authorization") String authToken) {
+        return ResponseEntity.status(HttpStatus.OK).body(authService.getUserData(authToken));
     }
 }

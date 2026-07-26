@@ -77,7 +77,7 @@ public class BookingService {
     }
 
     @Transactional
-    public ConfirmBookingResponse confirmBooking(Long bookingId) {
+    public ConfirmBookingResponse confirmBooking(Long bookingId, String paymentId) {
         Booking booking=bookingRepository.findById(bookingId).orElseThrow(()->new EntityNotFoundException(Translations.BOOKING_DOES_NOT_EXIST));
         if(booking.getBookingStatus()==BookingStatus.CONFIRMED) {
             return new ConfirmBookingResponse(bookingId,booking.getBookingStatus());
@@ -90,6 +90,7 @@ public class BookingService {
         }
 
         booking.setBookingStatus(BookingStatus.CONFIRMED);
+        booking.setPaymentId(paymentId);
         booking.setExpiresAt(booking.getCheckOut());
 
         return new ConfirmBookingResponse(bookingId,booking.getBookingStatus());
@@ -153,20 +154,9 @@ public class BookingService {
     }
 
     @Transactional
-    public void updateBookingOrderId(long bookingId, String orderId) {
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(()->new EntityNotFoundException(Translations.BOOKING_DOES_NOT_EXIST));
+    public void updateOrderDetails(long bookingId, String receiptId, String orderId) {
+        Booking booking=bookingRepository.findById(bookingId).orElseThrow(()->new EntityNotFoundException(Translations.BOOKING_DOES_NOT_EXIST));
         booking.setOrderId(orderId);
-    }
-
-    @Transactional
-    public void updateBookingPaymentId(long bookingId, String paymentId) {
-        Booking booking=bookingRepository.findById(bookingId).orElseThrow(()->new EntityNotFoundException(Translations.BOOKING_DOES_NOT_EXIST));
-        booking.setPaymentId(paymentId);
-    }
-
-    @Transactional
-    public void updateBookingReceiptId(long bookingId, String receiptId) {
-        Booking booking=bookingRepository.findById(bookingId).orElseThrow(()->new EntityNotFoundException(Translations.BOOKING_DOES_NOT_EXIST));
         if(receiptId!=null) {
             booking.setReceiptId(receiptId);
         }
