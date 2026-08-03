@@ -113,7 +113,8 @@ public class BookingService {
                         booking.getId(),
                         booking.getExpiresAt(),
                         booking.getOrderId(),
-                        booking.getPaymentId()
+                        booking.getPaymentId(),
+                        "INR"
                 )
         ).toList();
 

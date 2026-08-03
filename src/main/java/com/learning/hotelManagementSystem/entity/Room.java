@@ -41,8 +41,6 @@ public class Room {
     @Enumerated(EnumType.STRING) // store the STRING value only instead of ORDINAL(index of the values)
     private RoomType type;
 
-
-
     @OneToMany(mappedBy = "room")
     private List<Booking> bookingList;
 
