@@ -46,4 +46,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleRazorpayException(RazorpayException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiError(e.getMessage(),ApiErrorCodesEnum.RAZORPAY_ERROR.name()));
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleException(Exception e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError(e.getMessage(),ApiErrorCodesEnum.INTERNAL_SERVER_ERROR.name()));
+    }
 }

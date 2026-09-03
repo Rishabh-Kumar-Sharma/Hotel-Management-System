@@ -1,28 +1,39 @@
 package com.learning.hotelManagementSystem.service;
 
 import com.learning.hotelManagementSystem.DTO.RoomDTO.*;
+import com.learning.hotelManagementSystem.entity.Booking;
 import com.learning.hotelManagementSystem.entity.Room;
+import com.learning.hotelManagementSystem.entity.User;
 import com.learning.hotelManagementSystem.exceptions.DuplicateEntityException;
 import com.learning.hotelManagementSystem.repository.BookingRepository;
 import com.learning.hotelManagementSystem.repository.RoomRepository;
 import com.learning.hotelManagementSystem.translations.Translations;
 import com.learning.hotelManagementSystem.types.BookingStatus;
+import com.learning.hotelManagementSystem.types.RoomAvailabilityEnum;
 import com.learning.hotelManagementSystem.types.RoomStatus;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
+@Slf4j
 public class RoomService {
 
     @Autowired
     private RoomRepository roomRepository;
     @Autowired
     private BookingRepository bookingRepository;
+
+    private final List<BookingStatus> activeStatuses=new ArrayList<>(Arrays.asList(BookingStatus.CREATED, BookingStatus.CONFIRMED));
 
     public CreateRoomResponse addRoom(CreateRoomRequest room) {
         if (roomRepository.existsByRoomNumber(room.roomNumber())) {
@@ -84,5 +95,44 @@ public class RoomService {
                 ))
                 .toList()
         );
+    }
+
+    public GetRoomAvailabilityResponse getAvailableRoomsWithDatesFilter(GetRoomAvailabilityRequest request) {
+        final long bookingId=request.bookingId();
+        final Booking booking=bookingRepository.findById(bookingId).orElseThrow(()->new EntityNotFoundException(Translations.BOOKING_DOES_NOT_EXIST));
+        final Instant checkIn=request.checkIn(), checkOut=request.checkOut();
+
+        if(!checkIn.isBefore(checkOut)) {
+            throw new IllegalArgumentException(Translations.INVALID_CHECK_IN_CHECK_OUT_TIMES);
+        }
+        if(!booking.getCheckIn().isAfter(Instant.now())) {
+            throw new IllegalStateException(Translations.BOOKING_ALREADY_STARTED);
+        }
+
+        final long roomId=request.roomNumber();
+        final User user=(User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        final List<TimeSlot> bookedSlots=bookingRepository.getBookingsByRoomId(roomId,request.checkIn(),request.checkOut(),user.getId(),activeStatuses);
+        final List<TimeSlot> availableSlots=new ArrayList<>();
+        Instant current=request.checkIn();
+        for(TimeSlot bookedSlot:bookedSlots) {
+            if(bookedSlot.checkIn().isAfter(current)) {
+                availableSlots.add(new TimeSlot(current,bookedSlot.checkIn()));
+            }
+            if(bookedSlot.checkOut().isAfter(current)) {
+                current=bookedSlot.checkOut();
+            }
+        }
+        if(current.isBefore(request.checkOut())) {
+            availableSlots.add(new TimeSlot(current,request.checkOut()));
+        }
+
+        if(availableSlots.isEmpty()) {
+            return new GetRoomAvailabilityResponse(roomId, RoomAvailabilityEnum.NOT_AVAILABLE,availableSlots);
+        } else if(availableSlots.size()==1 && availableSlots.get(0).checkIn().equals(request.checkIn()) &&
+        availableSlots.get(0).checkOut().equals(request.checkOut())) {
+            return new GetRoomAvailabilityResponse(roomId, RoomAvailabilityEnum.AVAILABLE, availableSlots);
+        }
+        return new GetRoomAvailabilityResponse(roomId, RoomAvailabilityEnum.PARTIALLY_AVAILABLE, availableSlots);
     }
 }

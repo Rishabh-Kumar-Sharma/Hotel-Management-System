@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+
 @Service
 @Slf4j
 public class BookingWorkflowService {
@@ -81,5 +83,26 @@ public class BookingWorkflowService {
         }
 
         return bookingService.cancelBooking(bookingId);
+    }
+
+    public GetBookingResponse updateBooking(UpdateBookingDetailsRequest request) {
+        try {
+            Booking booking=bookingService.updateBookingDetails(request.bookingId(),request.checkIn(),request.checkOut());
+            return new GetBookingResponse(
+                    booking.getCheckIn(),
+                    booking.getCheckOut(),
+                    booking.getRoom().getPricePerNight(),
+                    booking.getRoom().getRoomNumber(),
+                    booking.getRoom().getType(),
+                    booking.getBookingStatus(),
+                    booking.getId(),
+                    booking.getExpiresAt(),
+                    booking.getOrderId(),
+                    booking.getPaymentId(),
+                    "INR"
+            );
+        } catch(Exception e) {
+            throw e;
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.learning.hotelManagementSystem.repository;
 
+import com.learning.hotelManagementSystem.DTO.RoomDTO.TimeSlot;
 import com.learning.hotelManagementSystem.entity.Booking;
 import com.learning.hotelManagementSystem.types.BookingStatus;
 import jakarta.persistence.LockModeType;
@@ -79,5 +80,22 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
                                            @Param("activeStatuses") List<BookingStatus> bookingStatuses,
                                            @Param("now") Instant now
                                            );
+
+    @Query("""
+            select b.checkIn, b.checkOut 
+            from Booking b
+            where b.room.roomNumber=:roomNumber
+            and b.checkIn<:checkOut
+            and b.checkOut>:checkIn
+            and b.customer.id<>:userId
+            and b.bookingStatus in (:activeStatuses)
+            order by b.checkIn
+            """)
+    List<TimeSlot> getBookingsByRoomId(@Param("roomNumber") long roomNumber,
+                                       @Param("checkIn") Instant checkIn,
+                                       @Param("checkOut") Instant checkOut,
+                                       @Param("userId") long userId,
+                                       @Param("activeStatuses") List<BookingStatus> activeStatuses
+                                            );
 }
 

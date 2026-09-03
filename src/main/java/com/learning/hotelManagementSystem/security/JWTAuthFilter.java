@@ -43,7 +43,6 @@ public class JWTAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
             final String requestTokenHeader=request.getHeader("Authorization");
-//            log.info("Request in JWT Auth Filter:{}",request);
             if(requestTokenHeader==null || !requestTokenHeader.startsWith("Bearer ")) {
                 filterChain.doFilter(request,response);
                 return;
@@ -65,6 +64,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(token1);
             }
             filterChain.doFilter(request, response);
+
         } catch (ExpiredJwtException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");

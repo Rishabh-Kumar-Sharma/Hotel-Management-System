@@ -2,6 +2,7 @@ package com.learning.hotelManagementSystem.controllers;
 
 import com.learning.hotelManagementSystem.DTO.RoomDTO.*;
 import com.learning.hotelManagementSystem.service.RoomService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/rooms")
+@Slf4j
 public class RoomController {
 
     @Autowired
@@ -27,5 +29,10 @@ public class RoomController {
     @PatchMapping("/updateRoom")
     public ResponseEntity<CreateRoomResponse> updateRoom(@RequestBody UpdateRoomRequest updateRoomRequest) {
         return ResponseEntity.status(HttpStatus.OK).body(roomService.updateRoomDetails(updateRoomRequest));
+    }
+
+    @PostMapping("/fetchAvailableRooms")
+    public ResponseEntity<GetRoomAvailabilityResponse> getAvailableRooms(@RequestBody GetRoomAvailabilityRequest request) {
+        return ResponseEntity.status(HttpStatus.OK).body(roomService.getAvailableRoomsWithDatesFilter(request));
     }
 }

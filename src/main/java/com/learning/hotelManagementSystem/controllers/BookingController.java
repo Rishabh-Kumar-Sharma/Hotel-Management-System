@@ -43,6 +43,11 @@ public class BookingController {
     public ResponseEntity<Map<String, List<GetBookingResponse>>> fetchAllBookings() {
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("bookings",bookingService.getAllBookings()));
     }
+
+    @PostMapping("/updateBooking")
+    public ResponseEntity<GetBookingResponse> updateBookingDetails(@RequestBody  UpdateBookingDetailsRequest request) {
+        return ResponseEntity.status(HttpStatus.OK).body(bookingWorkflowService.updateBooking(request));
+    }
 }
 
 

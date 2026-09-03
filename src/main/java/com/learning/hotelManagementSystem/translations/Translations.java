@@ -25,4 +25,5 @@ public interface Translations {
     public final String PAYMENT_REFUND_FAILED="Payment Refund Failed";
     public final String PAYMENT_DOES_NOT_EXIST="Payment doesn't exist";
     public final String REFUND_AMOUNT_GREATER_THAN_PAID="Refund amount can't be more than the amount paid";
+    public final String BOOKING_ALREADY_STARTED="Booking has already started";
 }

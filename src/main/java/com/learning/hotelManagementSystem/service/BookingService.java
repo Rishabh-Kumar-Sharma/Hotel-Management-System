@@ -162,4 +162,19 @@ public class BookingService {
             booking.setReceiptId(receiptId);
         }
     }
+
+    @Transactional
+    public Booking updateBookingDetails(long bookingId, Instant checkIn, Instant checkOut) {
+        Booking booking=bookingRepository.findById(bookingId).orElseThrow(()->new EntityNotFoundException(Translations.BOOKING_DOES_NOT_EXIST));
+
+        if(!checkIn.isBefore(checkOut)) {
+            throw new IllegalArgumentException(Translations.INVALID_CHECK_IN_CHECK_OUT_TIMES);
+        }
+        if(booking.getCheckIn().isBefore(Instant.now())) {
+            throw new IllegalStateException(Translations.BOOKING_ALREADY_STARTED);
+        }
+        booking.setCheckIn(checkIn);
+        booking.setCheckOut(checkOut);
+        return booking;
+    }
 }
