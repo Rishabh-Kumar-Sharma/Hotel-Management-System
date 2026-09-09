@@ -78,6 +78,9 @@ public class BookingWorkflowService {
 
     public CancelBookingResponse cancelBooking(long bookingId) {
         Booking booking = bookingService.getBookingDetails(bookingId);
+        if(!booking.getCheckIn().isAfter(Instant.now())) {
+            throw new IllegalArgumentException(Translations.BOOKING_ALREADY_STARTED);
+        }
         if (booking.getBookingStatus() == BookingStatus.CONFIRMED) {
             paymentService.refundPayment(new RefundPaymentRequest(bookingId, booking.getRoom().getPricePerNight()));
         }

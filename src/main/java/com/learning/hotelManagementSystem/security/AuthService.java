@@ -1,22 +1,24 @@
 package com.learning.hotelManagementSystem.security;
 
-import com.learning.hotelManagementSystem.DTO.UserDTO.CreateUserRequest;
-import com.learning.hotelManagementSystem.DTO.UserDTO.CreateUserResponse;
-import com.learning.hotelManagementSystem.DTO.UserDTO.LoginUserRequest;
-import com.learning.hotelManagementSystem.DTO.UserDTO.LoginUserResponse;
+import com.learning.hotelManagementSystem.DTO.NotificationDTO.EmailDTO;
+import com.learning.hotelManagementSystem.DTO.UserDTO.*;
 import com.learning.hotelManagementSystem.entity.Customer;
 import com.learning.hotelManagementSystem.entity.User;
 import com.learning.hotelManagementSystem.exceptions.DuplicateEntityException;
 import com.learning.hotelManagementSystem.repository.CustomerRepository;
 import com.learning.hotelManagementSystem.repository.UserRepository;
+import com.learning.hotelManagementSystem.service.EmailService;
+import com.learning.hotelManagementSystem.service.EmailVerificationService;
 import com.learning.hotelManagementSystem.translations.Translations;
 import com.learning.hotelManagementSystem.types.AuthProviderTypesEnum;
 import com.learning.hotelManagementSystem.types.UserType;
 import com.learning.hotelManagementSystem.utils.AuthUtil;
+import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,6 +26,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -36,6 +40,9 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final AuthUtil authUtil;
 
+    @Autowired
+    private final EmailVerificationService emailVerificationService;
+
     @Transactional
     private User signupInternal(CreateUserRequest userData, AuthProviderTypesEnum authProvider, String providerId) throws DuplicateEntityException {
         if(userRepository.existsByUserName(userData.userName())) {
@@ -47,6 +54,7 @@ public class AuthService {
                 .userName(userData.userName())
                 .name(userData.name())
                 .providerId(providerId)
+                .isEmailVerified(false)
                 .userType(UserType.CUSTOMER)
                 .authProviderType(authProvider)
                 .roles(Set.of(UserType.CUSTOMER))  // by-default the user will be created as a customer,
@@ -66,11 +74,15 @@ public class AuthService {
 
         customerRepository.save(customer);
 
+        if(authProvider==AuthProviderTypesEnum.EMAIL) {
+            emailVerificationService.sendAndSaveOTP(new VerifyEmailRequest(userData.userName(), userData.name()));
+        }
+
         return user;
     }
     public CreateUserResponse signup(CreateUserRequest userRequest) {
         User user=signupInternal(userRequest, AuthProviderTypesEnum.EMAIL,null);
-        return new CreateUserResponse(user.getUsername(),user.getId());
+        return new CreateUserResponse(user.getUsername(),user.getId(),true, user.getName());
     }
 
     public LoginUserResponse login(LoginUserRequest loginUserRequest) {
