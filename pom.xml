@@ -34,6 +34,13 @@
             <groupId>com.razorpay</groupId>
             <artifactId>razorpay-java</artifactId>
             <version>1.4.8</version>
+
+            <exclusions>
+                <exclusion>
+                    <groupId>com.squareup.okhttp3</groupId>
+                    <artifactId>okhttp</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -88,6 +95,11 @@
             <artifactId>jjwt-jackson</artifactId>
             <version>0.13.0</version>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.resend</groupId>
+            <artifactId>resend-java</artifactId>
+            <version>4.11.0</version>
         </dependency>
     </dependencies>
 
